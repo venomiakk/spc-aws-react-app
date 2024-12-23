@@ -15,6 +15,10 @@ const loginURL = import.meta.env.VITE_LOGIN_URL;
 //   "cognito:username": string;
 // }
 
+interface ExtendedAccessToken {
+  exp: number;
+}
+
 // Typowanie danych użytkownika
 export interface User {
   sub: string; // ID użytkownika (zależy od struktury tokenu)
@@ -42,17 +46,22 @@ function getCookie(name: string): string | null {
   return null;
 }
 
-function setCookie(name: string, value: string, hours: number): void {
-  const expires = new Date(Date.now() + hours * 60 * 60 * 1000).toUTCString();
-  console.log('expires:', expires)
+function setCookie(name: string, value: string, exp: number): void {
+  const currdate = new Date(exp);
+  const date = Math.floor(currdate.getTime() / 1000);
+  console.log("date:", date);
+  // * i guess it has to be saved as date to cookies
+  // TODO change this to date
+  // const expires = new Date(Date.now() + hours * 60 * 60 * 1000).toUTCString();
+  console.log("expires:", exp);
   // document.cookie = `${name}=${value}; path=/; expires=${expires}; Secure; HttpOnly; SameSite=Strict;`;
   // document.cookie = `${name}=${value}; path=/; expires=${expires};`;
-  document.cookie = `${name}=${value}; path=/; expires=${expires}; SameSite=None; Secure`;
+  document.cookie = `${name}=${value}; path=/; expires=${exp}; SameSite=None; Secure`;
   console.log(`setting coockie ${name}`);
 }
 
 function deleteCookie(name: string): void {
-  document.cookie = `${name}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT;`;
+  document.cookie = `${name}=; path=/; expires=0;`;
 }
 
 // Tworzymy kontekst
@@ -71,10 +80,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     if (idToken && accessToken) {
       try {
         const decodedIdToken = jwtDecode<JwtPayload & User>(idToken);
-        const currentTime = Math.floor(Date.now() / 1000);
+        const currentTime = Date.now();
 
         // Sprawdzamy, czy token nie wygasł
         if (decodedIdToken.exp && decodedIdToken.exp < currentTime) {
+          //TODO check exp correctly
           // Token wygasł, wylogowujemy użytkownika
           console.log("Token expired!");
           logout();
@@ -99,12 +109,20 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const accessTokenFromUrl = urlParams.get("access_token");
 
     if (idTokenFromUrl && accessTokenFromUrl) {
-      setCookie("id_token", idTokenFromUrl, 1 / 24); // Zapisanie tokenu na 60 minut (1/24 dnia)
-      setCookie("access_token", accessTokenFromUrl, 1 / 24); // Zapisanie tokenu na 60 minut (1/24 dnia)
-
-      // Dekodujemy i ustawiamy użytkownika
-      const decodedToken = jwtDecode<JwtPayload & User>(idTokenFromUrl);
-      setUser(decodedToken);
+      //TODO back to normal date
+      const decodedIdTokenFromUrl = jwtDecode<JwtPayload & User>(
+        idTokenFromUrl
+      );
+      const decodedAccessTokenFromUrl = jwtDecode<
+        JwtPayload & ExtendedAccessToken
+      >(accessTokenFromUrl);
+      setCookie("id_token", idTokenFromUrl, decodedIdTokenFromUrl.exp);
+      setCookie(
+        "access_token",
+        accessTokenFromUrl,
+        decodedAccessTokenFromUrl.exp
+      );
+      setUser(decodedIdTokenFromUrl);
 
       // Opcjonalnie, przekierowanie po zalogowaniu
       // window.history.replaceState({}, document.title, window.location.pathname);
@@ -112,11 +130,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   }, []);
 
   const login = (idToken: string, accessToken: string): void => {
-    setCookie("id_token", idToken, 1 / 24); // Zapisanie tokenu na 60 minut (1/24 dnia)
-    setCookie("access_token", accessToken, 1 / 24); // Zapisanie tokenu na 60 minut (1/24 dnia)
-
-    const decodedToken = jwtDecode<JwtPayload & User>(idToken);
-    setUser(decodedToken);
+    //TODO back to normal date
+    const decodedIdToken = jwtDecode<JwtPayload & User>(idToken);
+    const decodedAccessToken = jwtDecode<JwtPayload & ExtendedAccessToken>(
+      accessToken
+    );
+    setCookie("id_token", idToken, decodedIdToken.exp); // Zapisanie tokenu na 60 minut (1/24 dnia)
+    setCookie("access_token", accessToken, decodedAccessToken.exp); // Zapisanie tokenu na 60 minut (1/24 dnia)
+    setUser(decodedIdToken);
   };
 
   const logout = (): void => {
@@ -131,4 +152,3 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     </AuthContext.Provider>
   );
 };
-

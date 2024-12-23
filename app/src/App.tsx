@@ -2,12 +2,14 @@
 
 import { AuthProvider } from "./components/AuthProvider";
 import Navbar from "./components/Navbar";
+import FileSpace from "./components/FileSpace";
 
 function App() {
   return (
     <>
       <AuthProvider>
         <Navbar />
+        <FileSpace />
       </AuthProvider>
     </>
   );
