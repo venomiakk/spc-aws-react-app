@@ -2,14 +2,10 @@ import LoginButton from "./LoginButton";
 import { AuthContext, User } from "./AuthProvider";
 import { useContext } from "react";
 
-interface ExtendedUser {
-  "cognito:username": string;
-  // Add other properties if needed
-}
 
 const Navbar: React.FC = () => {
   const context = useContext(AuthContext);
-  const user = context?.user as User & ExtendedUser;
+  const user = context?.user as User;
   // console.log(user);
   if (user) {
     const username = user["cognito:username"];

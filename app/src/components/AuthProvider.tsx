@@ -10,6 +10,8 @@ http://localhost:5173/
 
 import { useEffect, useState, createContext, ReactNode } from "react";
 import { jwtDecode, JwtPayload } from "jwt-decode";
+import { sendLogToDB, LogAction } from "./Logger";
+
 const loginURL = import.meta.env.VITE_LOGIN_URL;
 // interface ExtendedJwtPayload extends JwtPayload {
 //   "cognito:username": string;
@@ -22,9 +24,10 @@ interface ExtendedAccessToken {
 // Typowanie danych użytkownika
 export interface User {
   sub: string; // ID użytkownika (zależy od struktury tokenu)
-  username: string;
+
   email: string;
-  exp: number; // Czas wygaśnięcia tokenu
+  exp: number;
+  "cognito:username": string;
 }
 
 // Typowanie kontekstu
@@ -127,7 +130,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         decodedAccessTokenFromUrl.exp
       );
       setUser(decodedIdTokenFromUrl);
-
+      sendLogToDB(
+        decodedIdTokenFromUrl["cognito:username"],
+        LogAction.LOGIN,
+        "User logged in"
+      );
       // Opcjonalnie, przekierowanie po zalogowaniu
       // window.history.replaceState({}, document.title, window.location.pathname);
     }
@@ -142,6 +149,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setCookie("id_token", idToken, decodedIdToken.exp);
     setCookie("access_token", accessToken, decodedAccessToken.exp);
     setUser(decodedIdToken);
+    sendLogToDB(
+      decodedIdToken["cognito:username"],
+      LogAction.LOGIN,
+      "User logged in"
+    );
   };
 
   const logout = (): void => {
