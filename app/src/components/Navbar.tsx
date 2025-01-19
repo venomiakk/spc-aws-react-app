@@ -10,7 +10,7 @@ interface ExtendedUser {
 const Navbar: React.FC = () => {
   const context = useContext(AuthContext);
   const user = context?.user as User & ExtendedUser;
-  console.log(user);
+  // console.log(user);
   if (user) {
     const username = user["cognito:username"];
     return (

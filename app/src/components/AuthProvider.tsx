@@ -47,17 +47,20 @@ function getCookie(name: string): string | null {
 }
 
 function setCookie(name: string, value: string, exp: number): void {
-  const currdate = new Date(exp);
-  const date = Math.floor(currdate.getTime() / 1000);
-  console.log("date:", date);
+  // const currdate = new Date(exp);
+  // const date = Math.floor(currdate.getTime() / 1000);
+  // console.log("date:", date);
   // * i guess it has to be saved as date to cookies
   // TODO change this to date
-  // const expires = new Date(Date.now() + hours * 60 * 60 * 1000).toUTCString();
-  console.log("expires:", exp);
+  // const expires = new Date(exp).toUTCString();
+  // console.log("expires:", exp);
+  // console.log(expires);
+  // console.log(new Date().toUTCString() < expires);
   // document.cookie = `${name}=${value}; path=/; expires=${expires}; Secure; HttpOnly; SameSite=Strict;`;
   // document.cookie = `${name}=${value}; path=/; expires=${expires};`;
   document.cookie = `${name}=${value}; path=/; expires=${exp}; SameSite=None; Secure`;
-  console.log(`setting coockie ${name}`);
+  // !
+  // console.log(`setting coockie ${name}`);
 }
 
 function deleteCookie(name: string): void {
@@ -80,7 +83,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     if (idToken && accessToken) {
       try {
         const decodedIdToken = jwtDecode<JwtPayload & User>(idToken);
-        const currentTime = Date.now();
+        const currentTime = Math.floor(Date.now() / 1000);
+        // console.log(currentTime)
 
         // Sprawdzamy, czy token nie wygasł
         if (decodedIdToken.exp && decodedIdToken.exp < currentTime) {
@@ -88,7 +92,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           // Token wygasł, wylogowujemy użytkownika
           console.log("Token expired!");
           logout();
-          // window.location.href = loginURL;
+          window.location.href = loginURL;
         } else {
           // Token jest ważny, ustawiamy użytkownika
           setUser(decodedIdToken);
@@ -96,11 +100,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       } catch (error) {
         console.error("Token decoding error:", error);
         logout();
-        // window.location.href = loginURL;
+        window.location.href = loginURL;
       }
     } else {
       console.log("No user logged in!");
-      // window.location.href = loginURL;
+      window.location.href = loginURL;
     }
     // ? can this cause any problems?
     // Jeśli w URL znajdują się tokeny, zapisujemy je w ciasteczkach
@@ -135,8 +139,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const decodedAccessToken = jwtDecode<JwtPayload & ExtendedAccessToken>(
       accessToken
     );
-    setCookie("id_token", idToken, decodedIdToken.exp); // Zapisanie tokenu na 60 minut (1/24 dnia)
-    setCookie("access_token", accessToken, decodedAccessToken.exp); // Zapisanie tokenu na 60 minut (1/24 dnia)
+    setCookie("id_token", idToken, decodedIdToken.exp);
+    setCookie("access_token", accessToken, decodedAccessToken.exp);
     setUser(decodedIdToken);
   };
 
