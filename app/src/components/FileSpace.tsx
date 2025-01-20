@@ -1,6 +1,7 @@
 import { AuthContext, User } from "./AuthProvider";
 import { useContext, useEffect, useState } from "react";
-// import AWS from "aws-sdk";
+import FileCard from "./FileCard";
+import FileDetailsModal from "./FileDetailsModal";
 import { listFiles } from "./ListFiles";
 import FileUploadModal from "./FileUploadModal";
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -17,6 +18,7 @@ const FileSpace: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [toast, setToast] = useState<Toast | null>(null);
+  const [selectedFile, setSelectedFile] = useState<string | null>(null);
 
   const showToast = (
     message: string,
@@ -54,11 +56,15 @@ const FileSpace: React.FC = () => {
           </div>
         </div>
       ) : (
-        <ul>
+        <div className="d-flex flex-wrap">
           {files.map((file) => (
-            <li key={file}>{file}</li>
+            <FileCard
+              key={file}
+              fileName={file}
+              onClick={() => setSelectedFile(file)}
+            />
           ))}
-        </ul>
+        </div>
       )}
 
       <button
@@ -68,7 +74,7 @@ const FileSpace: React.FC = () => {
           right: "2rem",
           width: "60px",
           height: "60px",
-          fontSize: "24px",
+          fontSize: "30px",
         }}
         onClick={() => setIsModalOpen(true)}
       >
@@ -83,6 +89,14 @@ const FileSpace: React.FC = () => {
           showToast={showToast}
         />
       )}
+
+      {selectedFile && (
+        <FileDetailsModal
+          fileName={selectedFile}
+          closeModal={() => setSelectedFile(null)}
+        />
+      )}
+
       {toast && (
         <div
           className="position-fixed top-0 end-0 p-3"

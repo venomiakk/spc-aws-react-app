@@ -56,6 +56,7 @@ export const listFiles = async (username: string): Promise<string[]> => {
     return fileNames;
   } catch (error) {
     console.error("Error listing files from S3:", error);
+    alert("Error listing files from S3");
     return [];
   }
 };
