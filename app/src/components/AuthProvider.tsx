@@ -53,7 +53,6 @@ function deleteCookie(name: string): void {
   document.cookie = `${name}=; path=/; expires=0;`;
 }
 
-// Tworzymy kontekst
 export const AuthContext = createContext<AuthContextType | undefined>(
   undefined
 );
@@ -61,9 +60,7 @@ export const AuthContext = createContext<AuthContextType | undefined>(
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
 
-  // Sprawdzanie tokenów w ciasteczkach po załadowaniu aplikacji
   useEffect(() => {
-    // TODO manage cookies better!!!!!!
     const idToken = getCookie("id_token");
     const accessToken = getCookie("access_token");
 
@@ -72,30 +69,23 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         const decodedIdToken = jwtDecode<JwtPayload & User>(idToken);
         const currentTime = Math.floor(Date.now() / 1000);
 
-        // Sprawdzamy, czy token nie wygasł
         if (decodedIdToken.exp && decodedIdToken.exp < currentTime) {
-          // Token wygasł, wylogowujemy użytkownika
           console.log("Token expired!");
           logout();
-          // !!loginpage
           window.location.href = loginURL;
         } else {
-          // Token jest ważny, ustawiamy użytkownika
           setUser(decodedIdToken);
         }
       } catch (error) {
         console.error("Token decoding error:", error);
         logout();
-        // !!loginpage
         window.location.href = loginURL;
       }
     } else {
       console.log("No user logged in!");
-      // !!loginpage
       window.location.href = loginURL;
     }
-    // ? can this cause any problems?
-    // Jeśli w URL znajdują się tokeny, zapisujemy je w ciasteczkach
+
     const urlParams = new URLSearchParams(window.location.hash.substring(1));
     const idTokenFromUrl = urlParams.get("id_token");
     const accessTokenFromUrl = urlParams.get("access_token");
@@ -119,8 +109,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         LogAction.LOGIN,
         "User logged in"
       );
-      // Opcjonalnie, przekierowanie po zalogowaniu
-      // window.history.replaceState({}, document.title, window.location.pathname);
     }
   }, []);
 

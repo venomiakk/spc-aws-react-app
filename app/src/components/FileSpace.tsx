@@ -48,7 +48,7 @@ const FileSpace: React.FC = () => {
   // }, [user]);
 
   return (
-    <div className="bg-light p-3 position-relative min-vh-100">
+    <div className="bg-light h-100">
       {loading ? (
         <div className="d-flex justify-content-center mt-5">
           <div className="spinner-border text-primary" role="status">
@@ -56,7 +56,7 @@ const FileSpace: React.FC = () => {
           </div>
         </div>
       ) : (
-        <div className="d-flex flex-wrap">
+        <div className="d-flex flex-wrap p-3">
           {files.map((file) => (
             <FileCard
               key={file}
@@ -78,7 +78,7 @@ const FileSpace: React.FC = () => {
         }}
         onClick={() => setIsModalOpen(true)}
       >
-        +
+        <i className="bi bi-cloud-upload"></i>
       </button>
 
       {isModalOpen && (

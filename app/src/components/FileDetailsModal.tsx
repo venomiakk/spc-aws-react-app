@@ -12,6 +12,10 @@ interface FileDetailsModalProps {
   closeModal: () => void;
 }
 
+interface SortConfig {
+  key: keyof FileVersion;
+  direction: "asc" | "desc";
+}
 
 const FileDetailsModal: React.FC<FileDetailsModalProps> = ({
   fileName,
@@ -19,6 +23,10 @@ const FileDetailsModal: React.FC<FileDetailsModalProps> = ({
 }) => {
   const [versions, setVersions] = useState<FileVersion[]>([]);
   const [loading, setLoading] = useState(true);
+  const [sortConfig, setSortConfig] = useState<SortConfig>({
+    key: "LastModified",
+    direction: "desc",
+  });
 
   const fetchVersions = async () => {
     try {
@@ -70,6 +78,36 @@ const FileDetailsModal: React.FC<FileDetailsModalProps> = ({
     }
   };
 
+  const sortData = (
+    data: FileVersion[],
+    key: keyof FileVersion,
+    direction: "asc" | "desc"
+  ) => {
+    return [...data].sort((a, b) => {
+      if (a[key] < b[key]) return direction === "asc" ? -1 : 1;
+      if (a[key] > b[key]) return direction === "asc" ? 1 : -1;
+      return 0;
+    });
+  };
+
+  const handleSort = (key: keyof FileVersion) => {
+    const direction =
+      sortConfig.key === key && sortConfig.direction === "asc" ? "desc" : "asc";
+    setSortConfig({ key, direction });
+    setVersions(sortData(versions, key, direction));
+  };
+
+  const getSortIcon = (key: keyof FileVersion) => {
+    if (sortConfig.key !== key) return "bi-arrow-down-up";
+    return sortConfig.direction === "asc" ? "bi-arrow-up" : "bi-arrow-down";
+  };
+
+  const downloadLatestVersion = async () => {
+    if (versions.length > 0) {
+      await downloadVersion(versions[0].VersionId);
+    }
+  };
+
   useEffect(() => {
     fetchVersions();
   }, [fileName]);
@@ -99,38 +137,66 @@ const FileDetailsModal: React.FC<FileDetailsModalProps> = ({
                 </div>
               </div>
             ) : (
-              <div className="table-responsive">
-                <table className="table">
-                  <thead>
-                    <tr>
-                      <th>Version</th>
-                      <th>Last Modified</th>
-                      <th>Size</th>
-                      <th>Action</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {versions.map((version) => (
-                      <tr key={version.VersionId}>
-                        <td>{version.VersionId.substring(0, 8)}...</td>
-                        <td>
-                          {new Date(version.LastModified).toLocaleString()}
-                        </td>
-                        <td>{(version.Size / 1024).toFixed(2)} KB</td>
-                        <td>
-                          <button
-                            className="btn btn-sm btn-primary"
-                            onClick={() => downloadVersion(version.VersionId)}
-                          >
-                            <i className="bi bi-download me-1"></i>
-                            Download
-                          </button>
-                        </td>
+              <>
+                <button
+                  className="btn btn-primary mb-3"
+                  onClick={downloadLatestVersion}
+                >
+                  <i className="bi bi-download me-1"></i>
+                  Download Latest Version
+                </button>
+                <div className="table-responsive">
+                  <table className="table table-hover">
+                    <thead>
+                      <tr>
+                        <th
+                          onClick={() => handleSort("VersionId")}
+                          style={{ cursor: "pointer" }}
+                        >
+                          Version{" "}
+                          <i className={`bi ${getSortIcon("VersionId")}`}></i>
+                        </th>
+                        <th
+                          onClick={() => handleSort("LastModified")}
+                          style={{ cursor: "pointer" }}
+                        >
+                          Last Modified{" "}
+                          <i
+                            className={`bi ${getSortIcon("LastModified")}`}
+                          ></i>
+                        </th>
+                        <th
+                          onClick={() => handleSort("Size")}
+                          style={{ cursor: "pointer" }}
+                        >
+                          Size <i className={`bi ${getSortIcon("Size")}`}></i>
+                        </th>
+                        <th>Action</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                    </thead>
+                    <tbody>
+                      {versions.map((version) => (
+                        <tr key={version.VersionId}>
+                          <td>{version.VersionId.substring(0, 8)}...</td>
+                          <td>
+                            {new Date(version.LastModified).toLocaleString()}
+                          </td>
+                          <td>{(version.Size / 1024).toFixed(2)} KB</td>
+                          <td>
+                            <button
+                              className="btn btn-sm btn-primary"
+                              onClick={() => downloadVersion(version.VersionId)}
+                            >
+                              <i className="bi bi-download me-1"></i>
+                              Download
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </>
             )}
           </div>
           <div className="modal-footer">
