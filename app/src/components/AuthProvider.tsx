@@ -11,6 +11,7 @@ http://localhost:5173/
 import { useEffect, useState, createContext, ReactNode } from "react";
 import { jwtDecode, JwtPayload } from "jwt-decode";
 import { sendLogToDB, LogAction } from "./Logger";
+import { configureCognitoIdentity } from "./AWSConfig";
 
 const loginURL = import.meta.env.VITE_LOGIN_URL;
 // interface ExtendedJwtPayload extends JwtPayload {
@@ -24,7 +25,6 @@ interface ExtendedAccessToken {
 // Typowanie danych użytkownika
 export interface User {
   sub: string; // ID użytkownika (zależy od struktury tokenu)
-
   email: string;
   exp: number;
   "cognito:username": string;
@@ -99,6 +99,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         } else {
           // Token jest ważny, ustawiamy użytkownika
           setUser(decodedIdToken);
+          // configureCognitoIdentity(idToken);
         }
       } catch (error) {
         console.error("Token decoding error:", error);
@@ -130,6 +131,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         decodedAccessTokenFromUrl.exp
       );
       setUser(decodedIdTokenFromUrl);
+      // configureCognitoIdentity(idTokenFromUrl);
       sendLogToDB(
         decodedIdTokenFromUrl["cognito:username"],
         LogAction.LOGIN,
@@ -154,6 +156,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       LogAction.LOGIN,
       "User logged in"
     );
+    // configureCognitoIdentity(idToken);
   };
 
   const logout = (): void => {

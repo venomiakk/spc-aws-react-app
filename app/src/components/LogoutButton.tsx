@@ -4,7 +4,7 @@ const LogoutButton = () => {
   const doLogout = () => {
     window.location.href = loginURL;
   };
-  return <button onClick={doLogout}>Logout</button>;
+  return <button onClick={doLogout} className="">Logout</button>;
 };
 
 export default LogoutButton;
