@@ -1,13 +1,11 @@
-import React, { useState, useContext } from "react";
+import React, { useContext } from "react";
 import LoginButton from "./LoginButton";
 import { AuthContext, User } from "./AuthProvider";
 import LogoutButton from "./LogoutButton";
-import FileUploadModal from "./FileUploadModal";
 
 const Navbar: React.FC = () => {
   const context = useContext(AuthContext);
   const user = context?.user as User;
-  const [isModalOpen, setIsModalOpen] = useState(false);
 
   return (
     <>
@@ -20,27 +18,12 @@ const Navbar: React.FC = () => {
           ) : (
             <LoginButton />
           )}
-          <div>
-            <button
-              className="btn btn-primary"
-              onClick={() => {
-                setIsModalOpen(true);
-              }}
-            >
-              Upload File
-            </button>
-          </div>
+
           <div>
             <LogoutButton />
           </div>
         </div>
       </nav>
-      {isModalOpen && (
-        <FileUploadModal
-          closeModal={() => setIsModalOpen(false)}
-          username={user["cognito:username"]}
-        />
-      )}
     </>
   );
 };

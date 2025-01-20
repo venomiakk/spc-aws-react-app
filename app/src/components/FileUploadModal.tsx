@@ -5,6 +5,7 @@ import { sendLogToDB, LogAction } from "./Logger";
 interface FileUploadModalProps {
   closeModal: () => void;
   username?: string;
+  onUploadSuccess: () => void;
 }
 
 interface Toast {
@@ -15,6 +16,7 @@ interface Toast {
 const FileUploadModal: React.FC<FileUploadModalProps> = ({
   closeModal,
   username = "",
+  onUploadSuccess,
 }) => {
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
@@ -53,6 +55,7 @@ const FileUploadModal: React.FC<FileUploadModalProps> = ({
       await s3.upload(params).promise();
       showToast(`File ${file.name} uploaded successfully!`, "success");
       sendLogToDB(username, LogAction.F_UPLOAD, `File ${file_path} uploaded`);
+      onUploadSuccess();
       closeModal();
     } catch (error) {
       console.error("Error uploading file:", error);

@@ -1,37 +1,30 @@
 import { AuthContext, User } from "./AuthProvider";
 import { useContext, useEffect, useState } from "react";
-import AWS from "aws-sdk";
-import "bootstrap/dist/css/bootstrap.min.css";
+// import AWS from "aws-sdk";
 import { listFiles } from "./ListFiles";
-
-// const AWSREGION = import.meta.env.VITE_AWS_REGION;
-// const APPCLIENTID = import.meta.env.VITE_COGNITO_APPCLIENT_ID;
-// const IDENTITYPOOLID = import.meta.env.VITE_IDENTITY_POOL_ID;
-// const USERPOOLID = import.meta.env.VITE_USER_POOL_ID;
-// const USERNAME = import.meta.env.VITE_FILE_PROVIDER;
-// const PASSWORD = import.meta.env.VITE_FILE_PROVIDER_CREDS;
-// const S3BUCKET = import.meta.env.VITE_S3_BUCKET_NAME;
+import FileUploadModal from './FileUploadModal';
+import "bootstrap/dist/css/bootstrap.min.css";
 
 const FileSpace: React.FC = () => {
   const context = useContext(AuthContext);
   const user = context?.user as User;
   const [files, setFiles] = useState<string[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const getFiles = async () => {
-    const fileNames = await listFiles(user["cognito:username"]);
-    setFiles(fileNames);
-  };
 
-  useEffect(() => {
-    const fetchFiles = async () => {
+  const refreshFiles = async () => {
+    if (user) {
+      setLoading(true);
       const fileNames = await listFiles(user["cognito:username"]);
       setFiles(fileNames);
       setLoading(false);
-    };
-    setLoading(true);
+    }
+  };
+
+  useEffect(() => {
     if (user) {
-      fetchFiles();
+      refreshFiles();
     }
   }, [user]);
 
@@ -40,11 +33,11 @@ const FileSpace: React.FC = () => {
   // }, [user]);
 
   return (
-    <div className="bg-light p-3">
+    <div className="bg-light p-3 position-relative min-vh-100">
       {loading ? (
         <div className="d-flex justify-content-center mt-5">
           <div className="spinner-border text-primary" role="status">
-            <span className="sr-only "></span>
+            <span className="sr-only"></span>
           </div>
         </div>
       ) : (
@@ -53,6 +46,28 @@ const FileSpace: React.FC = () => {
             <li key={file}>{file}</li>
           ))}
         </ul>
+      )}
+
+      <button
+        className="btn btn-primary rounded-circle position-fixed"
+        style={{
+          bottom: '2rem',
+          right: '2rem',
+          width: '60px',
+          height: '60px',
+          fontSize: '24px'
+        }}
+        onClick={() => setIsModalOpen(true)}
+      >
+        +
+      </button>
+
+      {isModalOpen && (
+        <FileUploadModal
+          closeModal={() => setIsModalOpen(false)}
+          username={user["cognito:username"]}
+          onUploadSuccess={refreshFiles}
+        />
       )}
     </div>
   );
