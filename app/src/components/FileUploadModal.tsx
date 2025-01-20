@@ -6,29 +6,20 @@ interface FileUploadModalProps {
   closeModal: () => void;
   username?: string;
   onUploadSuccess: () => void;
-}
-
-interface Toast {
-  message: string;
-  type: "success" | "error";
+  showToast: (
+    message: string,
+    type: "success" | "error" | "processing"
+  ) => void;
 }
 
 const FileUploadModal: React.FC<FileUploadModalProps> = ({
   closeModal,
   username = "",
   onUploadSuccess,
+  showToast,
 }) => {
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
-  const [toast, setToast] = useState<Toast | null>(null);
-
-  //TODO: Repair toast
-  const showToast = (message: string, type: "success" | "error") => {
-    setToast({ message, type });
-    setTimeout(() => {
-      setToast(null);
-    }, 3000);
-  };
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files) {
@@ -51,6 +42,11 @@ const FileUploadModal: React.FC<FileUploadModalProps> = ({
     };
 
     try {
+      // TODO: Add zip 'fake' handilng
+      if (file.name.toLowerCase().endsWith(".zip")) {
+        showToast("Processing zip file...", "processing");
+        await new Promise((resolve) => setTimeout(resolve, 3000)); // 3 second delay
+      }
       const s3 = new AWS.S3();
       await s3.upload(params).promise();
       showToast(`File ${file.name} uploaded successfully!`, "success");
@@ -72,11 +68,11 @@ const FileUploadModal: React.FC<FileUploadModalProps> = ({
 
   return (
     <>
+      {/* Modal Content */}
       <div
         className="modal"
         style={{ display: "block", backgroundColor: "rgba(0,0,0,0.5)" }}
       >
-        {/* Modal Content */}
         <div className="modal-dialog">
           <div className="modal-content">
             <div className="modal-header">
@@ -118,31 +114,6 @@ const FileUploadModal: React.FC<FileUploadModalProps> = ({
           </div>
         </div>
       </div>
-      {/* Toast Notification */}
-      {toast && (
-        <div
-          className={`position-fixed top-0 end-0 p-3`}
-          style={{ zIndex: 1070 }}
-        >
-          <div
-            className={`toast show align-items-center text-white ${
-              toast.type === "success" ? "bg-success" : "bg-danger"
-            }`}
-            role="alert"
-            aria-live="assertive"
-            aria-atomic="true"
-          >
-            <div className="d-flex">
-              <div className="toast-body">{toast.message}</div>
-              <button
-                type="button"
-                className="btn-close btn-close-white me-2 m-auto"
-                onClick={() => setToast(null)}
-              ></button>
-            </div>
-          </div>
-        </div>
-      )}
     </>
   );
 };
