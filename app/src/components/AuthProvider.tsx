@@ -81,6 +81,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           // Token wygasł, wylogowujemy użytkownika
           console.log("Token expired!");
           logout();
+          // !!loginpage
           window.location.href = loginURL;
         } else {
           // Token jest ważny, ustawiamy użytkownika
@@ -91,11 +92,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       } catch (error) {
         console.error("Token decoding error:", error);
         logout();
+        // !!loginpage
         window.location.href = loginURL;
       }
     } else {
       console.log("No user logged in!");
-      // window.location.href = loginURL;
+      // !!loginpage
+      window.location.href = loginURL;
     }
     // ? can this cause any problems?
     // Jeśli w URL znajdują się tokeny, zapisujemy je w ciasteczkach

@@ -19,6 +19,7 @@ const credentials = new AWS.CognitoIdentityCredentials({
 
 // TODO is something wrong with token?
 // ? maybe something wrong with cookies?
+// ? maybe wrong identity pool?
 const configureCognitoIdentity = (idToken: string) => {
   console.warn("Configuring Cognito Identity with token:", idToken);
   AWS.config.update({
@@ -35,8 +36,7 @@ const configureCognitoIdentity = (idToken: string) => {
       err
     ) {
       if (err) {
-        console.log("Error getting credentials:", err);
-        console.error("Error getting credentials:", err);
+        console.warn("Error getting credentials:", err);
       } else {
         console.log("AWS credentials:", AWS.config.credentials);
       }
