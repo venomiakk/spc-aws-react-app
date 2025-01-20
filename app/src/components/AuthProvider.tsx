@@ -11,7 +11,6 @@ http://localhost:5173/
 import { useEffect, useState, createContext, ReactNode } from "react";
 import { jwtDecode, JwtPayload } from "jwt-decode";
 import { sendLogToDB, LogAction } from "./Logger";
-import { configureCognitoIdentity } from "./AWSConfig";
 
 const loginURL = import.meta.env.VITE_LOGIN_URL;
 
@@ -69,9 +68,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const accessToken = getCookie("access_token");
 
     if (idToken && accessToken) {
-      // !tokens
-      console.log("cookies idToken:", idToken);
-      console.log("cookise accessToken:", accessToken);
       try {
         const decodedIdToken = jwtDecode<JwtPayload & User>(idToken);
         const currentTime = Math.floor(Date.now() / 1000);
@@ -86,8 +82,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         } else {
           // Token jest ważny, ustawiamy użytkownika
           setUser(decodedIdToken);
-          // !cci
-          configureCognitoIdentity(idToken);
         }
       } catch (error) {
         console.error("Token decoding error:", error);
@@ -105,9 +99,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const urlParams = new URLSearchParams(window.location.hash.substring(1));
     const idTokenFromUrl = urlParams.get("id_token");
     const accessTokenFromUrl = urlParams.get("access_token");
-    // !tokens
-    console.log("idTokenFromUrl:", idTokenFromUrl);
-    console.log("accessTokenFromUrl:", accessTokenFromUrl);
+
     if (idTokenFromUrl && accessTokenFromUrl) {
       const decodedIdTokenFromUrl = jwtDecode<JwtPayload & User>(
         idTokenFromUrl
@@ -122,8 +114,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         decodedAccessTokenFromUrl.exp
       );
       setUser(decodedIdTokenFromUrl);
-      // !cci
-      // configureCognitoIdentity(idTokenFromUrl);
       sendLogToDB(
         decodedIdTokenFromUrl["cognito:username"],
         LogAction.LOGIN,
@@ -139,9 +129,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     const decodedAccessToken = jwtDecode<JwtPayload & ExtendedAccessToken>(
       accessToken
     );
-    // !tokens
-    // console.log("Decoded ID token:", decodedIdToken);
-    // console.log("Decoded Access token:", decodedAccessToken);
     setCookie("id_token", idToken, decodedIdToken.exp);
     setCookie("access_token", accessToken, decodedAccessToken.exp);
     setUser(decodedIdToken);
@@ -150,8 +137,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       LogAction.LOGIN,
       "User logged in"
     );
-    // !cci
-    // configureCognitoIdentity(idToken);
   };
 
   const logout = (): void => {

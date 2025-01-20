@@ -1,49 +1,61 @@
 import { AuthContext, User } from "./AuthProvider";
 import { useContext, useEffect, useState } from "react";
-import { s3, credentials } from "./AWSConfig";
+import AWS from "aws-sdk";
+import "bootstrap/dist/css/bootstrap.min.css";
+import { listFiles } from "./ListFiles";
 
-const S3BUCKET = import.meta.env.VITE_S3_BUCKET_NAME;
+// const AWSREGION = import.meta.env.VITE_AWS_REGION;
+// const APPCLIENTID = import.meta.env.VITE_COGNITO_APPCLIENT_ID;
+// const IDENTITYPOOLID = import.meta.env.VITE_IDENTITY_POOL_ID;
+// const USERPOOLID = import.meta.env.VITE_USER_POOL_ID;
+// const USERNAME = import.meta.env.VITE_FILE_PROVIDER;
+// const PASSWORD = import.meta.env.VITE_FILE_PROVIDER_CREDS;
+// const S3BUCKET = import.meta.env.VITE_S3_BUCKET_NAME;
 
 const FileSpace: React.FC = () => {
   const context = useContext(AuthContext);
   const user = context?.user as User;
   const [files, setFiles] = useState<string[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
 
-  //TODO
-  // * ideas:
-  // get files using lambda
-  // get files using predefined user
-  // change to own login page and save credentials in cookies
-  // use new userpool and app client with guided setup
+  const getFiles = async () => {
+    const fileNames = await listFiles(user["cognito:username"]);
+    setFiles(fileNames);
+  };
+
   useEffect(() => {
-    // credentials.get((err) => {
-    //   if (err) {
-    //     console.error("Error retrieving credentials:", err);
-    //   } else {
-    //     console.log("Successfully retrieved credentials:", credentials);
-    //   }
-    // });
-    // const params = {
-    //   Bucket: S3BUCKET,
-    //   Prefix: "data/",
-    // };
-    // if (user) {
-    //   s3.listObjectsV2(
-    //     params,
-    //     (err: unknown, data: AWS.S3.ListObjectsV2Output) => {
-    //       if (err) {
-    //         console.log(err);
-    //       } else {
-    //         console.log(data);
-    //         const keys = data.Contents?.map((object) => object.Key) || [];
-    //         setFiles(keys as string[]);
-    //       }
-    //     }
-    //   );
-    // }
+    const fetchFiles = async () => {
+      const fileNames = await listFiles(user["cognito:username"]);
+      setFiles(fileNames);
+      setLoading(false);
+    };
+    setLoading(true);
+    if (user) {
+      fetchFiles();
+    }
   }, [user]);
 
-  return <div>FileSpace</div>;
+  // useEffect(() => {
+  //   listFiles();
+  // }, [user]);
+
+  return (
+    <div className="bg-light p-3">
+      {loading ? (
+        <div className="d-flex justify-content-center mt-5">
+          <div className="spinner-border text-primary" role="status">
+            <span className="sr-only "></span>
+          </div>
+        </div>
+      ) : (
+        <ul>
+          {files.map((file) => (
+            <li key={file}>{file}</li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
 };
 
 export default FileSpace;
