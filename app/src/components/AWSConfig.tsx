@@ -17,8 +17,10 @@ const credentials = new AWS.CognitoIdentityCredentials({
   IdentityPoolId: IDENTITYPOOLID,
 });
 
+// TODO is something wrong with token?
+// ? maybe something wrong with cookies?
 const configureCognitoIdentity = (idToken: string) => {
-  // console.log("Configuring Cognito Identity with token:", idToken);
+  console.warn("Configuring Cognito Identity with token:", idToken);
   AWS.config.update({
     region: AWSREGION,
     credentials: new AWS.CognitoIdentityCredentials({
@@ -28,17 +30,30 @@ const configureCognitoIdentity = (idToken: string) => {
       },
     }),
   });
-
-  // Force refresh the credentials
-  (AWS.config.credentials as AWS.CognitoIdentityCredentials).refresh(
-    (error) => {
-      if (error) {
-        console.error("Error refreshing credentials:", error);
+  if (AWS.config.credentials) {
+    (AWS.config.credentials as AWS.CognitoIdentityCredentials).get(function (
+      err
+    ) {
+      if (err) {
+        console.log("Error getting credentials:", err);
+        console.error("Error getting credentials:", err);
       } else {
-        console.log("Successfully refreshed credentials");
+        console.log("AWS credentials:", AWS.config.credentials);
       }
-    }
-  );
+    });
+  } else {
+    console.error("AWS.config.credentials is null or undefined");
+  }
+  // Force refresh the credentials
+  // (AWS.config.credentials as AWS.CognitoIdentityCredentials).refresh(
+  //   (error) => {
+  //     if (error) {
+  //       console.error("Error refreshing credentials:", error);
+  //     } else {
+  //       console.log("Successfully refreshed credentials");
+  //     }
+  //   }
+  // );
 };
 
 export { s3, credentials, configureCognitoIdentity };

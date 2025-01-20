@@ -14,9 +14,6 @@ import { sendLogToDB, LogAction } from "./Logger";
 import { configureCognitoIdentity } from "./AWSConfig";
 
 const loginURL = import.meta.env.VITE_LOGIN_URL;
-// interface ExtendedJwtPayload extends JwtPayload {
-//   "cognito:username": string;
-// }
 
 interface ExtendedAccessToken {
   exp: number;
@@ -50,20 +47,7 @@ function getCookie(name: string): string | null {
 }
 
 function setCookie(name: string, value: string, exp: number): void {
-  // const currdate = new Date(exp);
-  // const date = Math.floor(currdate.getTime() / 1000);
-  // console.log("date:", date);
-  // * i guess it has to be saved as date to cookies
-  // TODO change this to date
-  // const expires = new Date(exp).toUTCString();
-  // console.log("expires:", exp);
-  // console.log(expires);
-  // console.log(new Date().toUTCString() < expires);
-  // document.cookie = `${name}=${value}; path=/; expires=${expires}; Secure; HttpOnly; SameSite=Strict;`;
-  // document.cookie = `${name}=${value}; path=/; expires=${expires};`;
   document.cookie = `${name}=${value}; path=/; expires=${exp}; SameSite=None; Secure`;
-  // !
-  // console.log(`setting coockie ${name}`);
 }
 
 function deleteCookie(name: string): void {
@@ -80,18 +64,20 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   // Sprawdzanie tokenów w ciasteczkach po załadowaniu aplikacji
   useEffect(() => {
+    // TODO manage cookies better!!!!!!
     const idToken = getCookie("id_token");
     const accessToken = getCookie("access_token");
 
     if (idToken && accessToken) {
+      // !tokens
+      console.log("cookies idToken:", idToken);
+      console.log("cookise accessToken:", accessToken);
       try {
         const decodedIdToken = jwtDecode<JwtPayload & User>(idToken);
         const currentTime = Math.floor(Date.now() / 1000);
-        // console.log(currentTime)
 
         // Sprawdzamy, czy token nie wygasł
         if (decodedIdToken.exp && decodedIdToken.exp < currentTime) {
-          //TODO check exp correctly
           // Token wygasł, wylogowujemy użytkownika
           console.log("Token expired!");
           logout();
@@ -99,7 +85,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         } else {
           // Token jest ważny, ustawiamy użytkownika
           setUser(decodedIdToken);
-          // configureCognitoIdentity(idToken);
+          // !cci
+          configureCognitoIdentity(idToken);
         }
       } catch (error) {
         console.error("Token decoding error:", error);
@@ -108,16 +95,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
     } else {
       console.log("No user logged in!");
-      window.location.href = loginURL;
+      // window.location.href = loginURL;
     }
     // ? can this cause any problems?
     // Jeśli w URL znajdują się tokeny, zapisujemy je w ciasteczkach
     const urlParams = new URLSearchParams(window.location.hash.substring(1));
     const idTokenFromUrl = urlParams.get("id_token");
     const accessTokenFromUrl = urlParams.get("access_token");
-
+    // !tokens
+    console.log("idTokenFromUrl:", idTokenFromUrl);
+    console.log("accessTokenFromUrl:", accessTokenFromUrl);
     if (idTokenFromUrl && accessTokenFromUrl) {
-      //TODO back to normal date
       const decodedIdTokenFromUrl = jwtDecode<JwtPayload & User>(
         idTokenFromUrl
       );
@@ -131,6 +119,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         decodedAccessTokenFromUrl.exp
       );
       setUser(decodedIdTokenFromUrl);
+      // !cci
       // configureCognitoIdentity(idTokenFromUrl);
       sendLogToDB(
         decodedIdTokenFromUrl["cognito:username"],
@@ -143,11 +132,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   }, []);
 
   const login = (idToken: string, accessToken: string): void => {
-    //TODO back to normal date
     const decodedIdToken = jwtDecode<JwtPayload & User>(idToken);
     const decodedAccessToken = jwtDecode<JwtPayload & ExtendedAccessToken>(
       accessToken
     );
+    // !tokens
+    // console.log("Decoded ID token:", decodedIdToken);
+    // console.log("Decoded Access token:", decodedAccessToken);
     setCookie("id_token", idToken, decodedIdToken.exp);
     setCookie("access_token", accessToken, decodedAccessToken.exp);
     setUser(decodedIdToken);
@@ -156,6 +147,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       LogAction.LOGIN,
       "User logged in"
     );
+    // !cci
     // configureCognitoIdentity(idToken);
   };
 
