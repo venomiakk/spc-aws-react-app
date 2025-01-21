@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
 import AWS from "aws-sdk";
 import { sendLogToDB, LogAction } from "./Logger";
-import { v4 as uuid } from "uuid";
-import axios from "axios";
+// import { v4 as uuid } from "uuid";
+// import axios from "axios";
 
-const logs_endpoint = import.meta.env.VITE_LOGS_API;
+// const logs_endpoint = import.meta.env.VITE_LOGS_API;
 
 interface FileVersion {
   VersionId: string;
@@ -62,6 +62,7 @@ const FileDetailsModal: React.FC<FileDetailsModalProps> = ({
 
   const downloadVersion = async (versionId: string) => {
     try {
+      // 1. Get file from S3
       const s3 = new AWS.S3();
       const response = await s3
         .getObject({
@@ -71,22 +72,29 @@ const FileDetailsModal: React.FC<FileDetailsModalProps> = ({
         })
         .promise();
 
+      // 2. Create blob and URL
       const blob = new Blob([response.Body as Buffer]);
       const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = fileName.split("/").pop() || fileName;
 
-      document.body.appendChild(a);
-      await new Promise((resolve) => {
-        a.click();
-        setTimeout(resolve, 100); // Small delay to ensure download starts
-      });
+      // 3. Create and trigger download
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = fileName.split("/").pop() || fileName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
 
+      // 4. Cleanup URL
       window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
+
+      await sendLogToDB(
+        username,
+        LogAction.F_DOWNLOAD,
+        `Downloaded file: ${fileName}, version: ${versionId}`
+      );
     } catch (error) {
-      console.error("Error downloading file:", error);
+      console.error("Download error:", error);
+      throw error;
     }
   };
 
