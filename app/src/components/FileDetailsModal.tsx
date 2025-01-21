@@ -1,5 +1,10 @@
 import React, { useEffect, useState } from "react";
 import AWS from "aws-sdk";
+import { sendLogToDB, LogAction } from "./Logger";
+import { v4 as uuid } from "uuid";
+import axios from "axios";
+
+const logs_endpoint = import.meta.env.VITE_LOGS_API;
 
 interface FileVersion {
   VersionId: string;
@@ -10,6 +15,7 @@ interface FileVersion {
 interface FileDetailsModalProps {
   fileName: string;
   closeModal: () => void;
+  username: string;
 }
 
 interface SortConfig {
@@ -20,6 +26,7 @@ interface SortConfig {
 const FileDetailsModal: React.FC<FileDetailsModalProps> = ({
   fileName,
   closeModal,
+  username,
 }) => {
   const [versions, setVersions] = useState<FileVersion[]>([]);
   const [loading, setLoading] = useState(true);
@@ -69,8 +76,13 @@ const FileDetailsModal: React.FC<FileDetailsModalProps> = ({
       const a = document.createElement("a");
       a.href = url;
       a.download = fileName.split("/").pop() || fileName;
+
       document.body.appendChild(a);
-      a.click();
+      await new Promise((resolve) => {
+        a.click();
+        setTimeout(resolve, 100); // Small delay to ensure download starts
+      });
+
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
     } catch (error) {
@@ -118,35 +130,35 @@ const FileDetailsModal: React.FC<FileDetailsModalProps> = ({
       style={{ display: "block", backgroundColor: "rgba(0,0,0,0.5)" }}
     >
       <div className="modal-dialog modal-lg modal-dialog-scrollable">
-        <div className="modal-content">
-          <div className="modal-header">
+        <div className="modal-content bg-dark text-light">
+          <div className="modal-header border-secondary">
             <h5 className="modal-title">
               File Details: {fileName.split("/").pop()}
             </h5>
             <button
               type="button"
-              className="btn-close"
+              className="btn-close btn-close-white"
               onClick={closeModal}
             ></button>
           </div>
           <div className="modal-body" style={{ maxHeight: "60vh" }}>
             {loading ? (
               <div className="text-center">
-                <div className="spinner-border text-primary" role="status">
+                <div className="spinner-border spinner_color" role="status">
                   <span className="visually-hidden">Loading...</span>
                 </div>
               </div>
             ) : (
               <>
                 <button
-                  className="btn btn-primary mb-3"
+                  className="custom_button_pos mb-3"
                   onClick={downloadLatestVersion}
                 >
                   <i className="bi bi-download me-1"></i>
                   Download Latest Version
                 </button>
                 <div className="table-responsive">
-                  <table className="table table-hover">
+                  <table className="table table-dark table-hover">
                     <thead>
                       <tr>
                         <th
@@ -184,7 +196,7 @@ const FileDetailsModal: React.FC<FileDetailsModalProps> = ({
                           <td>{(version.Size / 1024).toFixed(2)} KB</td>
                           <td>
                             <button
-                              className="btn btn-sm btn-primary"
+                              className="btn-sm custom_button_pos"
                               onClick={() => downloadVersion(version.VersionId)}
                             >
                               <i className="bi bi-download me-1"></i>
@@ -199,10 +211,10 @@ const FileDetailsModal: React.FC<FileDetailsModalProps> = ({
               </>
             )}
           </div>
-          <div className="modal-footer">
+          <div className="modal-footer border-secondary">
             <button
               type="button"
-              className="btn btn-secondary"
+              className="custom_button_neg"
               onClick={closeModal}
             >
               Close

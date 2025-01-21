@@ -42,7 +42,6 @@ const FileUploadModal: React.FC<FileUploadModalProps> = ({
     };
 
     try {
-      // TODO: Add zip 'fake' handilng
       if (file.name.toLowerCase().endsWith(".zip")) {
         showToast("Processing zip file...", "processing");
         await new Promise((resolve) => setTimeout(resolve, 3000)); // 3 second delay
@@ -74,17 +73,17 @@ const FileUploadModal: React.FC<FileUploadModalProps> = ({
         style={{ display: "block", backgroundColor: "rgba(0,0,0,0.5)" }}
       >
         <div className="modal-dialog">
-          <div className="modal-content">
-            <div className="modal-header">
+          <div className="modal-content bg-dark text-light ">
+            <div className="modal-header border-secondary">
               <h5 className="modal-title">Upload File</h5>
               <button
                 type="button"
-                className="btn-close"
+                className="btn-close btn-close-white"
                 onClick={closeModal}
                 aria-label="Close"
               ></button>
             </div>
-            <div className="modal-body">
+            <div className="modal-body ">
               <div className="mb-3">
                 <label className="form-label">Choose File</label>
                 <input
@@ -94,17 +93,17 @@ const FileUploadModal: React.FC<FileUploadModalProps> = ({
                 />
               </div>
             </div>
-            <div className="modal-footer">
+            <div className="modal-footer border-secondary">
               <button
                 type="button"
-                className="btn btn-secondary"
+                className="custom_button_neg"
                 onClick={closeModal}
               >
                 Close
               </button>
               <button
                 type="button"
-                className="btn btn-primary"
+                className="custom_button_pos"
                 onClick={handleUpload}
                 disabled={!file || uploading}
               >

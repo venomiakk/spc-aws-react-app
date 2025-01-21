@@ -48,10 +48,10 @@ const FileSpace: React.FC = () => {
   // }, [user]);
 
   return (
-    <div className="bg-light h-100">
+    <div className="bg-dark h-100">
       {loading ? (
         <div className="d-flex justify-content-center mt-5">
-          <div className="spinner-border text-primary" role="status">
+          <div className="spinner-border spinner_color" role="status">
             <span className="sr-only"></span>
           </div>
         </div>
@@ -68,7 +68,7 @@ const FileSpace: React.FC = () => {
       )}
 
       <button
-        className="btn btn-primary rounded-circle position-fixed"
+        className="rounded-circle position-fixed custom_button_pos"
         style={{
           bottom: "2rem",
           right: "2rem",
@@ -94,6 +94,7 @@ const FileSpace: React.FC = () => {
         <FileDetailsModal
           fileName={selectedFile}
           closeModal={() => setSelectedFile(null)}
+          username={user["cognito:username"]}
         />
       )}
 

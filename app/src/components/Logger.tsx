@@ -20,15 +20,14 @@ export const sendLogToDB = async (
     action: action,
     description: description,
   };
-  //TODO
-  console.log("Uncomment the code to send logs to the database");
-  // try {
-  //   const response = await axios.post(logs_endpoint, log_item);
-  //   if (response.status !== 200) {
-  //     throw new Error("Failed to send log to database");
-  //   }
-  //   console.log("Log sent successfully");
-  // } catch (error) {
-  //   console.error("Failed to send log to database:", error);
-  // }
+  // console.log("Uncomment the code to send logs to the database");
+  try {
+    const response = await axios.post(logs_endpoint, log_item);
+    if (response.status !== 200) {
+      throw new Error("Failed to send log to database");
+    }
+    console.log("Log sent successfully");
+  } catch (error) {
+    console.error("Failed to send log to database:", error);
+  }
 };

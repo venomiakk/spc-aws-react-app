@@ -1,0 +1,47 @@
+:root {
+  --accent-color: #4e03fc;
+  --accent-hover: #3900be;
+  --dark1: #696969;
+  --dark2: #4e4e4e;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.spinner_color {
+  color: var(--accent-color);
+}
+
+.custom_button_pos {
+  background-color: var(--accent-color);
+  color: var(--bs-light);
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.custom_button_pos:hover {
+  background-color: var(--accent-hover);
+}
+
+.custom_button_neg {
+  background-color: var(--dark1);
+  color: var(--bs-light);
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.custom_button_neg:hover {
+  background-color: var(--dark2);
+}

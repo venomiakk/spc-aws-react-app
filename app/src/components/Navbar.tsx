@@ -9,11 +9,19 @@ const Navbar: React.FC = () => {
 
   return (
     <>
-      <nav className="navbar sticky-top" style={{ backgroundColor: "#e3f2fd" }}>
+      <nav
+        className="navbar sticky-top bg-dark border-bottom border-secondary"
+      >
         <div className="container-fluid">
           {user ? (
             <>
-              <p>Hello, {user["cognito:username"]}</p>
+              <p
+                style={{
+                  fontSize: "1.5rem",
+                }}
+              >
+                Hello, {user["cognito:username"]}
+              </p>
             </>
           ) : (
             <LoginButton />

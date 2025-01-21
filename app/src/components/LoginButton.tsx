@@ -6,7 +6,11 @@ const LoginButton = () => {
     window.location.href = loginURL;
   };
 
-  return <button onClick={goToLoginPage}>Login</button>;
+  return (
+    <button onClick={goToLoginPage} className="custom_button_pos">
+      Login
+    </button>
+  );
 };
 
 export default LoginButton;

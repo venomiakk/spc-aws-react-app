@@ -6,7 +6,7 @@ const LogoutButton = () => {
     window.location.href = loginURL;
   };
   return (
-    <button onClick={doLogout} className="">
+    <button onClick={doLogout} className="custom_button_pos">
       Logout
     </button>
   );
