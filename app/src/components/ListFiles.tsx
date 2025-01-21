@@ -8,8 +8,6 @@ const USERNAME = import.meta.env.VITE_FILE_PROVIDER;
 const PASSWORD = import.meta.env.VITE_FILE_PROVIDER_CREDS;
 const S3BUCKET = import.meta.env.VITE_S3_BUCKET_NAME;
 
-// TODO add toast on error
-
 export const listFiles = async (username: string): Promise<string[]> => {
   AWS.config.update({
     region: AWSREGION,
@@ -46,7 +44,7 @@ export const listFiles = async (username: string): Promise<string[]> => {
     const s3 = new AWS.S3();
     const bucketparams = {
       Bucket: S3BUCKET,
-      Prefix: `${username}/`, //TODO: error handling?
+      Prefix: `${username}/`,
     };
     const response = await s3.listObjectsV2(bucketparams).promise();
     const fileNames =
