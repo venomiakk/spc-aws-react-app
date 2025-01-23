@@ -70,7 +70,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
     } else {
       console.log("No user logged in!");
-      window.location.href = loginURL;
+      // window.location.href = loginURL;
     }
 
     const urlParams = new URLSearchParams(window.location.hash.substring(1));
